@@ -1,21 +1,21 @@
 /**
  * @file src/core/qnx/mouse_driver.js
- * @version 1.7.0-RELEASE-QNX-MOUSE-ROUTER-SPACE
+ * @version 1.7.3-RELEASE-QNX-MOUSE-ROUTER-SPACE-STERILE-IMPORTS
  * @description PAC-контроллер распределения мышиных прерываний SGR.
- * ИСПРАВЛЕНО: Файл полностью размонолитизирован. Клики контента вынесены в квант processHardwareWindowContentClick.
+ * ИСПРАВЛЕНО: Выжжен фантомный импорт _qnxActiveSlotsCountContainer из шапки, устранен SyntaxError.
  * СТРОГИЙ КОНТРАКТ: 0% try/catch, 0% ООП, 100% точный координатный роутинг.
  */
 
-import { _qnxHardwareRegistry, REG_X, REG_Y, REG_W, REG_H, REG_FOCUS, REG_ENABLED } from "./shared_state.js";
+// 🔥 ИСПРАВЛЕНО: Импортируются только легитимные бинарные константы и структуры ОЗУ ядра
+import { _qnxHardwareRegistry, REG_X, REG_Y, REG_W, REG_H, REG_FOCUS, REG_ENABLED, REG_ACTIVE_TAB } from "./shared_state.js";
 import { msg_send_qnx } from "./ipc_bus.js";
 import { ix } from "./intents_spec.js";
 import { _globalVfsWorkerLinkBypass } from "../../../index.js";
 
-// Подключаем доменные кванты (Spaces) мышиного ввода
 import { processAbstractWindowTabClick } from "./window_manager.js";
 import { processModifierTabsClick } from "./mouse/modifier_tabs_click.js";
 import { processMouseWheelScroll } from "./mouse/wheel_scroll.js";
-import { processHardwareWindowContentClick } from "./mouse/content_click.js"; // 🔥 УТВЕРЖДЕНО: Новый изолированный домен
+import { processHardwareWindowContentClick } from "./mouse/content_click.js"; 
 
 export function processHardwareMouseQuantum(clickX, clickY, mBtn, isRelease) {
     const curX = clickX | 0;
@@ -108,18 +108,30 @@ export function processHardwareMouseQuantum(clickX, clickY, mBtn, isRelease) {
         // Клик по строке вкладок бизнес-панелей (Строка Y = sY + 1)
         if (curY === ((sY + 1) | 0)) {
             const isTabIntercepted = processAbstractWindowTabClick(curX, targetSlotId);
+            
             if (isTabIntercepted === true) {
+                if (targetSlotId === 102 || targetSlotId === 103) {
+                    const newActiveTabNum = _qnxHardwareRegistry[targetOffset + REG_ACTIVE_TAB] | 0;
+                    const targetPathStr = globalThis._qnxVfsPathMap[`${targetSlotId}_${newActiveTabNum}`] || "./";
+
+                    if (_globalVfsWorkerLinkBypass) {
+                        _globalVfsWorkerLinkBypass.postMessage({
+                            slotId: targetSlotId | 0,
+                            targetStackIdx: newActiveTabNum | 0,
+                            currentPath: String(targetPathStr)
+                        });
+                    }
+                }
                 msg_send_qnx(1, 4, ix.SYS_RENDER, 0);
             }
             return;
         }
 
-        // 🔥 КЛИК ПО ВНУТРЕННЕМУ КОНТЕНТУ ОКНА (Строки Y >= sY + 2)
-        // Вся тяжелая логика кликов по файлам/темам улетела в квантованный изолированный Space
+        // КЛИК ПО ВНУТРЕННЕМУ КОНТЕНТУ ОКНА (Строки Y >= sY + 2)
         const sH = _qnxHardwareRegistry[targetOffset + REG_H] | 0;
         processHardwareWindowContentClick(curX, curY, targetSlotId, sY, sH, _globalVfsWorkerLinkBypass);
     }
 }
 
-// TIMESTAMP: 2026-09-27 15:53:40
+// TIMESTAMP: 2026-09-27 21:48:10
 // PATH: c:\slotcmp_5\V\src\core\qnx\mouse_driver.js

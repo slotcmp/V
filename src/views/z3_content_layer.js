@@ -1,17 +1,39 @@
 /**
  * @file src/views/z3_content_layer.js
- * @version 1.6.0-RELEASE-QNX-Z3-ZERO-HARDCODE
+ * @version 1.6.2-RELEASE-QNX-Z3-EXTENSIBILITY-FIXED
  * @description DOD-процедура затирки оконного фона, наката общих рамок/табов и полиморфной диспетчеризации контента слотов (Слой Z-3).
- * ИСПРАВЛЕНО: Хардкодный словарь компонентов и импорты вьюшек полностью выжжены. Внедрена открытая dispatch-таблица.
+ * ИСПРАВЛЕНО: Блокировка preventExtensions удалена со стадии инициализации модуля, ликвидирован TypeError вьюшек.
  * СТРОГИЙ КОНТРАКТ: 0% try/catch в рантайме, 0% объектов в цикле редукции, 100% Zero Allocation.
  */
+
+import fs from "node:fs";
+import pathNode from "node:path";
 
 import { _virtualCanvasState, _qnxHardwareRegistry, REG_X, REG_Y, REG_W, REG_H, REG_FOCUS, REG_ENABLED, REG_SELECTED_IDX, REG_TOTAL_ITEMS, packCellBits } from "../core/qnx/shared_state.js";
 import { drawAbstractWindowWrapper } from "../core/qnx/window_manager.js";
 
-// 🔥 УТВЕРЖДЕНО: Открытая плоская DOD-матрица графических роутеров по индексам slotId.
-// Сюда вьюшки приборов будут автоматически инжектировать свои указатели при старте системы (Self-Registration).
+// Открытая плоская DOD-матрица графических роутеров по индексам slotId
 export const _qnxComponentBlitDispatchTable = [];
+
+// Автоматический стартовый цикл сборки диспетчера (Build-Time / Boot-Stage Mapping)
+const slotsConfigPath = pathNode.resolve(process.cwd(), "./slots_config.json");
+const rawConfigData = fs.readFileSync(slotsConfigPath, "utf8");
+const slotsConfig = JSON.parse(rawConfigData);
+
+const slotKeysArray = Object.keys(slotsConfig);
+const keysCount = slotKeysArray.length | 0;
+
+for (let i = 0; i < keysCount; i = (i + 1) | 0) {
+    const slotIdStr = slotKeysArray[i];
+    const slotIdNum = parseInt(slotIdStr, 10) & 255;
+    if (isNaN(slotIdNum) || slotIdNum === 0) continue;
+
+    // Стерильно резервируем ячейку в массиве под каждый слот из конфига
+    _qnxComponentBlitDispatchTable[slotIdNum] = null;
+}
+
+// 🔥 ИСПРАВЛЕНО: Любые preventExtensions/freeze на этапе бутстрапа модуля ЗАПРЕЩЕНЫ.
+// Массив запечатает верховное ядро в index.js строго ПОСЛЕ завершения саморегистрации всех вьюх.
 
 export function reduceContentLayer(currentCols) {
     const currentRows = _qnxHardwareRegistry[(0 << 4) + 1] | 0;
@@ -50,10 +72,10 @@ export function reduceContentLayer(currentCols) {
             }
         }
 
-        // Вызов общего Window Manager
+        // Накатываем общую стальную раму и ушки вкладок через Window Manager
         drawAbstractWindowWrapper(_virtualCanvasState, slotId, currentCols, totalCellsLimit, activeThemeId);
 
-        // 🔥 Мономорфный выстрел по индексу. Код больше ничего не знает о существовании конкретных файлов вьюшек!
+        // Мономорфный выстрел по индексу
         const blitRendererFn = _qnxComponentBlitDispatchTable[slotId];
 
         if (blitRendererFn) {
@@ -65,5 +87,5 @@ export function reduceContentLayer(currentCols) {
     }
 }
 
-// TIMESTAMP: 2026-09-27 15:42:15
+// TIMESTAMP: 2026-09-27 21:51:12
 // PATH: c:\slotcmp_5\V\src\views\z3_content_layer.js

@@ -1,7 +1,7 @@
 /**
  * @file src/core/qnx/vfs_initializer.js
- * @version 2.2.0-RELEASE-QNX-HYDRATOR-STAGE-TRACKED
- * @description Верховный двухфайловый гидратор ОЗУ ядра. Интегрирован пошаговый трекер стадий загрузки (REG_CORE_BOOT_STAGE).
+ * @version 2.3.0-RELEASE-QNX-HYDRATOR-TOPOLOGY-PARSER
+ * @description Двухфайловый гидратор ОЗУ ядра. Интегрирован посимвольный парсер текстовых высот topology.json в бинарные регистры 14 и 15.
  * СТРОГИЙ КОНТРАКТ: 0% try/catch, 0% объектов в рантайме, 100% Zero Allocation.
  */
 
@@ -13,10 +13,11 @@ import {
     _qnxDisplayIndexToSlotMap,
     _qnxStaticTextViewerBuffer,
     REG_CORE_READY_MASK,
-    REG_CORE_BOOT_STAGE, // 🔥 УТВЕРЖДЕНО: Регистр логгера стадий загрузки
+    REG_CORE_BOOT_STAGE, 
     CORE_BIT_VFS_INIT,
     CORE_BIT_SLOT_110,
-    REG_X, REG_Y, REG_W, REG_H, REG_FOCUS, REG_ENABLED, REG_TOTAL_ITEMS, REG_ACTIVE_TAB 
+    REG_X, REG_Y, REG_W, REG_H, REG_FOCUS, REG_ENABLED, REG_TOTAL_ITEMS, REG_ACTIVE_TAB,
+    REG_SIZE_TYPE, REG_SIZE_VALUE
 } from "./shared_state.js";
 
 export const _qnxStaticVfsBytesBuffer = new Uint8Array(64 * 1000);
@@ -57,16 +58,16 @@ export function initializeHardwareRegistryDefaults() {
         _qnxHardwareRegistry[offset + REG_FOCUS]      = slotIdNum === 102 ? 1 : 0; 
         _qnxHardwareRegistry[offset + REG_ACTIVE_TAB] = (cfgNode.activeStackIdx | 0) & 15;
 
+        // По дефолту инициализируем геометрический паспорт (проценты, 50% веса)
+        _qnxHardwareRegistry[offset + REG_SIZE_TYPE]  = 1;
+        _qnxHardwareRegistry[offset + REG_SIZE_VALUE] = 50;
+
         if (typeof cfgNode.displayIndex !== "undefined" && cfgNode.displayIndex !== null) {
             const dIdx = parseInt(cfgNode.displayIndex, 10) & 15;
             if (dIdx >= 0 && dIdx < 10) {
                 _qnxDisplayIndexToSlotMap[dIdx] = slotIdNum | 0;
                 _qnxHardwareRegistry[offset + 10] = dIdx | 0; 
             }
-        }
-
-        if (cfgNode.height && slotIdNum === 108) {
-            _qnxHardwareRegistry[offset + 13] = parseInt(cfgNode.height, 10) | 0;
         }
 
         if (Array.isArray(cfgNode.tabs)) {
@@ -85,7 +86,7 @@ export function initializeHardwareRegistryDefaults() {
     _qnxHardwareRegistry[bootStageOffset] = 1;
 
     // =================================================================
-    // ФАЗА Б: ЗАГРУЗКА И ФИКСАЦИЯ СЕТКИ ТОПОЛОГИИ (topology.json)
+    // ФАЗА Б: ЗАГРУЗКА, ФИКСАЦИЯ И ПАРСИНГ СЕТКИ ТОПОЛОГИИ (topology.json)
     // =================================================================
     const topologyPath = pathNode.resolve(rootPathStr, "./topology.json");
     const rawTopologyData = fs.readFileSync(topologyPath, "utf8");
@@ -93,7 +94,32 @@ export function initializeHardwareRegistryDefaults() {
     
     globalThis._layoutTopologyTree = topology;
 
-    // СТАДИЯ 2: topology.json успешно прочитан, каркас сетки зафиксирован
+    // СКАНИРУЕМ И ПАРСИМ КАРКАС ТОПОЛОГИИ В БИНАРНЫЙ ВИД (Без рекурсии)
+    const rootChildren = topology.children || [];
+    const rootLen = rootChildren.length | 0;
+
+    for (let i = 0; i < rootLen; i = (i + 1) | 0) {
+        const node = rootChildren[i];
+        if (!node) continue;
+
+        if (node.type === "slot") {
+            parseAndInjectNodeGeometryLocal(node);
+        }
+
+        if (node.type === "container" && Array.isArray(node.children)) {
+            const subChildren = node.children;
+            const subLen = subChildren.length | 0;
+            
+            for (let k = 0; k < subLen; k = (k + 1) | 0) {
+                const subNode = subChildren[k];
+                if (subNode && subNode.type === "slot") {
+                    parseAndInjectNodeGeometryLocal(subNode);
+                }
+            }
+        }
+    }
+
+    // СТАДИЯ 2: topology.json успешно прочитан и разложен на регистры 14 и 15
     _qnxHardwareRegistry[bootStageOffset] = 2;
 
     // ХОЛОДНЫЙ НАЛИВ ТЕСТОВОГО ГИПЕРТЕКСТА В ОЗУ ВЬЮЕРА
@@ -108,13 +134,38 @@ export function initializeHardwareRegistryDefaults() {
     
     _qnxHardwareRegistry[(110 << 4) + 9] = totalLinesCount | 0;
 
-    // СТАДИЯ 3: Тестовое гипертекстовое пространство заполнено
+    // СТАДИЯ 3: Тестовое пространство заполнено
     _qnxHardwareRegistry[bootStageOffset] = 3;
 
     _qnxHardwareRegistry[(0 << 4) + REG_CORE_READY_MASK] |= CORE_BIT_VFS_INIT;
 
     if (_qnxHardwareRegistry[(110 << 4) + REG_ENABLED] === 1) {
         _qnxHardwareRegistry[(0 << 4) + REG_CORE_READY_MASK] |= CORE_BIT_SLOT_110;
+    }
+}
+
+/**
+ * Внутренний безаллокационный парсер текстовых размеров
+ */
+function parseAndInjectNodeGeometryLocal(node) {
+    const slotIdNum = parseInt(node.id, 10) & 255;
+    if (isNaN(slotIdNum) || slotIdNum === 0) return;
+
+    const offset = slotIdNum << 4;
+    const heightStr = String(node.height || "");
+    const hLen = heightStr.length | 0;
+
+    if (hLen > 0) {
+        // Проверяем наличие процента % у правого края текстовой строки
+        const lastChar = heightStr.charCodeAt((hLen - 1) | 0) | 0;
+        
+        if (lastChar === 0x25) { // Символ '%'
+            _qnxHardwareRegistry[offset + REG_SIZE_TYPE]  = 1; // Процентный тип размера
+            _qnxHardwareRegistry[offset + REG_SIZE_VALUE] = parseInt(heightStr, 10) & 0xFFFF;
+        } else {
+            _qnxHardwareRegistry[offset + REG_SIZE_TYPE]  = 0; // Фиксированные строки
+            _qnxHardwareRegistry[offset + REG_SIZE_VALUE] = parseInt(heightStr, 10) & 0xFFFF;
+        }
     }
 }
 
@@ -155,5 +206,5 @@ export function performSynchronousVfsInject(targetSlotIdNum, relativePathStr) {
     _qnxHardwareRegistry[(targetSlotIdNum << 4) + 9] = totalValidFiles; 
 }
 
-// TIMESTAMP: 2026-09-27 14:52:12
+// TIMESTAMP: 2026-09-27 21:34:10
 // PATH: c:\slotcmp_5\V\src\core\qnx\vfs_initializer.js

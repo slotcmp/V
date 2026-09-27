@@ -1,9 +1,8 @@
 /**
  * @file src/views/viewer_view.js
- * @version 1.5.1-RELEASE-QNX-VIEWER-TRIPLE-PASS-ABSOLUTE-FIXED
- * @description Верховный блайтер Слота 110, осуществляющий посимвольное форматирование по абсолютным координатным коридорам.
- * ИСПРАВЛЕНО: Паддинг ячеек привязан к статической матрице _staticAbsoluteColumnXPositions.
- * ИСПРАВЛЕНО: Полностью ликвидирован сдвиг сетки разделителей и прорыв контурных дефисов.
+ * @version 1.5.2-RELEASE-QNX-VIEWER-TRIPLE-PASS-MUTATION-FIXED
+ * @description Стерильный декомпозированный отрисовщик контента Слота 110 (Viewers).
+ * ИСПРАВЛЕНО: Ликвидирована ошибка перезаписи константы за счет указания индекса [110] таблицы диспетчеризации.
  * СТРОГИЙ КОНТРАКТ: 0% try/catch, 0% RegExp, 0% создания строк, 100% Zero Allocation.
  */
 
@@ -44,7 +43,6 @@ export function drawSlotBufferContent(canvas, sX, sY, sW, sH, selectedIndex, tot
 
     const rightMaxEdgeX = (sX + sW - 2) | 0;
 
-    // ПАСС 1: Разведка ОЗУ. Фиксируем абсолютные финишные X-координаты коридоров колонок
     calculateMarkdownTableGeometry(_qnxStaticTextViewerBuffer, currentBytePtr, bufferLimit, maxVisibleRows, _staticColumnWidthsRegistry);
 
     for (let r = 0; r < maxVisibleRows; r = (r + 1) | 0) {
@@ -81,9 +79,6 @@ export function drawSlotBufferContent(canvas, sX, sY, sW, sH, selectedIndex, tot
         clearUtf8DecoderState();
         let currentColumnIdx = 0;
 
-        // =================================================================
-        // ПАСС 2: СБОРКА СТРОКИ С ФИКСАЦИЕЙ ПО АБСОЛЮТНЫМ КОРИДОРАМ X
-        // =================================================================
         while (currentBytePtr < bufferLimit) {
             const charByte = _qnxStaticTextViewerBuffer[currentBytePtr];
             if (charByte === 0x0A || charByte === 0x00) {
@@ -121,7 +116,6 @@ export function drawSlotBufferContent(canvas, sX, sY, sW, sH, selectedIndex, tot
 
             if (activeTabMode === 0 && finalCharCode === 0x7C) {
                 if (pipesInRowTracker > 1 && writeBufferX > 0) {
-                    // 🔥 ИСПРАВЛЕНО: Паддинг пушит каретку строго до абсолютной целевой X-координаты коридора столбца
                     const targetX = _staticAbsoluteColumnXPositions[currentColumnIdx] | 0;
                     
                     while (writeBufferX < targetX && writeBufferX < 256) {
@@ -134,7 +128,7 @@ export function drawSlotBufferContent(canvas, sX, sY, sW, sH, selectedIndex, tot
 
                 if (writeBufferX < 256) {
                     _staticRowLineByteBuffer[writeBufferX] = isRowDelimiter ? 0x253C : 0x2502;
-                    _staticRowMetaStyleBuffer[writeBufferX] = 8; // Маркер системной сетки таблицы
+                    _staticRowMetaStyleBuffer[writeBufferX] = 8; 
                     writeBufferX = (writeBufferX + 1) | 0;
                 }
 
@@ -156,9 +150,6 @@ export function drawSlotBufferContent(canvas, sX, sY, sW, sH, selectedIndex, tot
             currentBytePtr = (currentBytePtr + 1) | 0;
         }
 
-        // =================================================================
-        // ПАСС 3: ПРЯМОЙ СИНХРОННЫЙ БЛАЙТИНГ НА КАНВАС БЕЗ ВЕТВЛЕНИЙ
-        // =================================================================
         let charCursorX = (sX + 2) | 0;
         for (let x = 0; x < writeBufferX; x = (x + 1) | 0) {
             if (canvasPtr >= totalCellsLimit || charCursorX >= rightMaxEdgeX) break;
@@ -185,7 +176,8 @@ export function drawSlotBufferContent(canvas, sX, sY, sW, sH, selectedIndex, tot
     drawVerticalScrollbarInline(canvas, currentColsNum, sX, startContentY, sW, maxVisibleRows, scrollOffset, totalCells || 1, isFocused);
 }
 
-_qnxComponentBlitDispatchTable = drawSlotBufferContent;
+// 🔥 ИСПРАВЛЕНО: Инъекция блайтера строго по индексу Слота 110 константной dispatch-матрицы
+_qnxComponentBlitDispatchTable[110] = drawSlotBufferContent;
 
-// TIMESTAMP: 2026-09-27 18:43:00
+// TIMESTAMP: 2026-09-27 18:52:00
 // PATH: c:\slotcmp_5\V\src\views\viewer_view.js

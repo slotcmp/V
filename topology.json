@@ -7,11 +7,13 @@
   "children": [
     {
       "id": "200",
-      "type": "slot"
+      "type": "slot",
+      "height": "1"
     },
     {
       "id": "101",
-      "type": "slot"
+      "type": "slot",
+      "height": "7"
     },
     {
       "id": "main_workspace",
@@ -22,29 +24,35 @@
       "children": [
         {
           "id": "102",
-          "type": "slot"
+          "type": "slot",
+          "width": "40%"
         },
         {
           "id": "110",
-          "type": "slot"
+          "type": "slot",
+          "width": "60%"
         }
       ]
     },
     {
       "id": "105",
-      "type": "slot"
+      "type": "slot",
+      "height": "1"
     },
     {
       "id": "104",
-      "type": "slot"
+      "type": "slot",
+      "height": "1"
     },
     {
       "id": "108",
-      "type": "slot"
+      "type": "slot",
+      "height": "20%"
     },
     {
       "id": "100",
-      "type": "slot"
+      "type": "slot",
+      "height": "1"
     }
   ]
 }

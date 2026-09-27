@@ -24,12 +24,12 @@
       { "title": "LOG", "path": "C:/slotcmp_5/V/src/core" }
     ]
   },
-  "110": {
+  "201": {
     "enabled": true,
-    "component": "viewrs",
+    "component": "benchmark",
     "displayIndex": 3,
     "activeStackIdx": 1,
-    "tabs": ["MARKDOWN", "TEXT", "TREE"]
+    "tabs": ["MEMORY", "CPU", "FLUSHER"]
   },
   "105": {
     "enabled": true,
@@ -45,8 +45,7 @@
   "108": {
     "enabled": true,
     "component": "logger",
-    "displayIndex": 6,
-    "height": "20%"
+    "displayIndex": 6
   },
   "100": {
     "enabled": true,

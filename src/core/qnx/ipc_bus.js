@@ -1,8 +1,8 @@
 ﻿/**
  * @file src/core/qnx/ipc_bus.js
- * @version 3.0.1-RELEASE-QNX-BUS-VIEWER-ROUTING-FIXED
+ * @version 3.0.2-RELEASE-QNX-BUS-PURE-ROUTER-CLEAN-IMPORTS
  * @description Высокоскоростная FIFO-шина. Полностью размонолитизирована на изолированные кванты прерываний.
- * ИСПРАВЛЕНО: Ссылка регистрации 0x011E теперь корректно пробрасывает targetSlot в процессор инжекта контента.
+ * ИСПРАВЛЕНО: Выжжен фантомный импорт _qnxActiveSlotsCountContainer, устранен SyntaxError.
  * СТРОГИЙ КОНТРАКТ: 0% try/catch, 0% ООП, 100% плоская shared memory.
  */
 
@@ -11,7 +11,15 @@ import { ix } from "./intents_spec.js";
 import { blitDisplayFrameMonomorphic } from "../../io/terminal/tree_builder.js";
 import { flushVirtualCanvasToTtyMonomorphic } from "../../io/terminal/flusher.js";
 import { snifferLogBusIntent } from "./io_sniffer.js";
-import { _qnxHardwareRegistry, REG_CORE_READY_MASK, CORE_BIT_RESIZE } from "./shared_state.js";
+
+// 🔥 ИСПРАВЛЕНО: Импортируются только легитимные бинарные константы и структуры ОЗУ ядра
+import { 
+    _qnxHardwareRegistry, 
+    REG_CORE_READY_MASK, 
+    CORE_BIT_RESIZE,
+    CORE_BIT_VFS_INIT,
+    CORE_BIT_THEMES
+} from "./shared_state.js";
 
 import { executeHardwareResizeStep } from "./intents/resize_processor.js";
 import { executeHardwareFocusStep } from "./intents/focus_processor.js";
@@ -19,18 +27,25 @@ import { executeVfsInjectStep } from "./intents/vfs_inject_processor.js";
 import { executeThemesInjectStep } from "./intents/themes_inject_processor.js";
 import { executeViewerInjectStep } from "./intents/viewer_inject_processor.js";
 
+// Кольцевой FIFO-буфер шины (4096 слотов заявок по 2 ячейки = хэш заголовка + payload)
 const _ipcRingBuffer = new Int32Array(4096 * 2);
 let _ipcHeadPtr = 0;
 let _ipcTailPtr = 0;
 
+// Атомарный глобальный регистр грязи растра
 let _isCanvasDirtyBool = false;
 
+// Хранители предыдущего состояния процессора для расчета дельты нагрузки без GC-кучи
 let _prevCpuIdle = 0;
 let _prevCpuTotal = 0;
 let _lastTelemetryTime = 0;
 
+// Плоская DOD-матрица процессоров интентов шины по HEX-кодам сигналов
 const _qnxBusIntentDispatchTable = [];
 
+/**
+ * Синхронно укладывает новую транзакцию в кольцо FIFO
+ */
 export function msg_send_qnx(targetSlot, originSlot, signalId, payload) {
     const sig = signalId & 0xFFFF;
 
@@ -62,6 +77,9 @@ export function msg_send_qnx(targetSlot, originSlot, signalId, payload) {
     }
 }
 
+/**
+ * АППАРАТНЫЙ ТАКТ ВЫКАТКИ КАДРА
+ */
 export function dispatchHardwareClockPulse() {
     const now = Date.now();
     
@@ -107,6 +125,9 @@ export function dispatchHardwareClockPulse() {
     }
 }
 
+/**
+ * Прокручивает накопившиеся заявки за один квант системного тика (Main Thread Clock)
+ */
 export function executeKernelReactiveTick() {
     const coreReadyOffset = (0 << 4) + REG_CORE_READY_MASK;
 
@@ -127,7 +148,6 @@ export function executeKernelReactiveTick() {
         const intentProcessorFn = _qnxBusIntentDispatchTable[signalId];
 
         if (intentProcessorFn) {
-            // Передаем сквозной targetSlot третьим аргументом для динамического роутинга
             intentProcessorFn(payload, coreReadyOffset, targetSlot);
             _isCanvasDirtyBool = true;
         } else {
@@ -147,7 +167,6 @@ export function executeKernelReactiveTick() {
 
 _qnxBusIntentDispatchTable[0x011C] = (payload, coreReadyOffset) => executeVfsInjectStep(payload, coreReadyOffset);
 _qnxBusIntentDispatchTable[0x011D] = (payload, coreReadyOffset) => executeThemesInjectStep(payload, coreReadyOffset);
-// 🔥 ИСПРАВЛЕНО: Сквозной проброс targetSlot в квант вьюера
 _qnxBusIntentDispatchTable[0x011E] = (payload, coreReadyOffset, targetSlot) => executeViewerInjectStep(payload, coreReadyOffset, targetSlot);
 
 Object.freeze(_qnxBusIntentDispatchTable);
