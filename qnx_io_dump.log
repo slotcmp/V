@@ -1,0 +1,17 @@
+================================================================
+[QNX INT32 KERNEL IO SNIFFER ACTIVE] Start Timestamp: 2026-09-27T14:50:04.673Z
+================================================================
+
+  ├── [BUS_INTENT] 0x00A2 | TargetSlot: 9 | OriginSlot: 0 | Payload: 3145936
+  ├── [BUS_INTENT] 0x00B5 | TargetSlot: 1 | OriginSlot: 0 | Payload: 0
+  └── [TTY_FLUSH_FRAME] Physical Buffer Sent to stdout: 92888 bytes
+  ├── [BUS_INTENT] 0x011D | TargetSlot: 106 | OriginSlot: 0 | Payload: 12
+  └── [TTY_FLUSH_FRAME] Physical Buffer Sent to stdout: 104166 bytes
+  ├── [BUS_INTENT] 0x00B5 | TargetSlot: 108 | OriginSlot: 4 | Payload: 13
+  ├── [BUS_INTENT] 0x00B5 | TargetSlot: 1 | OriginSlot: 4 | Payload: 0
+  └── [TTY_FLUSH_FRAME] Physical Buffer Sent to stdout: 662 bytes
+  ├── [BUS_INTENT] 0x011E | TargetSlot: 110 | OriginSlot: 0 | Payload: 10
+  └── [TTY_FLUSH_FRAME] Physical Buffer Sent to stdout: 10189 bytes
+  ├── [BUS_INTENT] 0x011A | TargetSlot: 110 | OriginSlot: 4 | Payload: -1
+  ├── [BUS_INTENT] 0x00B5 | TargetSlot: 1 | OriginSlot: 4 | Payload: 0
+  └── [TTY_FLUSH_FRAME] Physical Buffer Sent to stdout: 53951 bytes

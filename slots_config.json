@@ -1,0 +1,56 @@
+{
+  "200": {
+    "enabled": true,
+    "component": "tabsbar",
+    "displayIndex": 0,
+    "tabs": ["DEFAULT", "CTRL", "SHIFT", "ALT"]
+  },
+  "101": {
+    "enabled": true,
+    "component": "dashboard",
+    "displayIndex": 1,
+    "activeStackIdx": 0,
+    "tabs": ["RULER", "MONITOR"]
+  },
+  "102": {
+    "enabled": true,
+    "component": "explorer",
+    "displayIndex": 2,
+    "activeStackIdx": 0,
+    "tabs": [
+      { "title": "SYS", "path": "C:/Windows" },
+      { "title": "SRC", "path": "C:/slotcmp_5/V" },
+      { "title": "MOD", "path": "C:/slotcmp_5/V/src" },
+      { "title": "LOG", "path": "C:/slotcmp_5/V/src/core" }
+    ]
+  },
+  "110": {
+    "enabled": true,
+    "component": "viewrs",
+    "displayIndex": 3,
+    "activeStackIdx": 1,
+    "tabs": ["MARKDOWN", "TEXT", "TREE"]
+  },
+  "105": {
+    "enabled": true,
+    "component": "command",
+    "displayIndex": 5
+  },
+  "104": {
+    "enabled": true,
+    "component": "fnbar",
+    "displayIndex": 8,
+    "activeStackIdx": 0
+  },
+  "108": {
+    "enabled": true,
+    "component": "logger",
+    "displayIndex": 6,
+    "height": "20%"
+  },
+  "100": {
+    "enabled": true,
+    "component": "taskbar",
+    "displayIndex": 7
+  }
+}

@@ -1,0 +1,14 @@
+[
+  { "id": 0, "name": "1. CLASSIC STEEL", "borderColorMsk": "gray", "passiveColorMsk": "darkgray" },
+  { "id": 1, "name": "2. COBALT OCEAN",  "borderColorMsk": "blue", "passiveColorMsk": "navy" },
+  { "id": 2, "name": "3. AMETHYST NEON", "borderColorMsk": "purple", "passiveColorMsk": "darkgray" },
+  { "id": 3, "name": "4. MATRIX OLIVE",  "borderColorMsk": "olive", "passiveColorMsk": "black" },
+  { "id": 4, "name": "5. DEEP CRIMSON",  "borderColorMsk": "maroon", "passiveColorMsk": "green" },
+  { "id": 5, "name": "6. MIDNIGHT NAVY", "borderColorMsk": "navy", "passiveColorMsk": "black" },
+  { "id": 6, "name": "7. CYBER",         "borderColorMsk": "gold", "passiveColorMsk": "cyan" },
+  { "id": 7, "name": "8. COBALT OCEAN",  "borderColorMsk": "blue", "passiveColorMsk": "navy" },
+  { "id": 8, "name": "9. AMETHYST NEON", "borderColorMsk": "purple", "passiveColorMsk": "darkgray" },
+  { "id": 9, "name": "10. MATRIX OLIVE", "borderColorMsk": "olive", "passiveColorMsk": "black" },
+  { "id": 10, "name": "11. DEEP CRIMSON", "borderColorMsk": "maroon", "passiveColorMsk": "green" },
+  { "id": 11, "name": "12. CONTRAST NEON", "borderColorMsk": "cyan", "passiveColorMsk": "purple" }
+]

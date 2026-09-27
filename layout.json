@@ -1,0 +1,300 @@
+{
+  "id": "root",
+  "type": "container",
+  "flexDirection": "column",
+  "width": "100%",
+  "height": "100%",
+  "children": [
+    {
+      "id": "200",
+      "type": "slot",
+      "component": "tabsbar",
+      "displayIndex": 0,
+      "width": "100%",
+      "height": "1",
+      "enabled": true,
+      "collapsed": false,
+      "contentVisible": true,
+      "tabs": [
+        {
+          "id": "f_default",
+          "title": "DEFAULT"
+        },
+        {
+          "id": "f_ctrl",
+          "title": "CTRL"
+        },
+        {
+          "id": "f_shift",
+          "title": "SHIFT"
+        },
+        {
+          "id": "f_alt",
+          "title": "ALT"
+        }
+      ]
+    },
+    {
+      "id": "101",
+      "type": "slot",
+      "component": "dashboard",
+      "displayIndex": 1,
+      "width": "100%",
+      "height": "7",
+      "activeStackIdx": 0,
+      "enabled": true,
+      "collapsed": false,
+      "contentVisible": true,
+      "tabs": [
+        {
+          "id": "t1",
+          "title": "RULER"
+        },
+        {
+          "id": "t2",
+          "title": "MONITOR"
+        }
+      ]
+    },
+    {
+      "id": "main_workspace",
+      "type": "container",
+      "flexDirection": "row",
+      "width": "100%",
+      "height": "50%",
+      "children": [
+        {
+          "id": "102",
+          "type": "slot",
+          "component": "explorer",
+          "displayIndex": 2,
+          "width": "40%",
+          "height": "100%",
+          "activeStackIdx": 0,
+          "enabled": true,
+          "collapsed": false,
+          "contentVisible": true,
+          "tabs_in": true,
+          "tabs": [
+            {
+              "id": "t1",
+              "title": "SYS",
+              "path": "C:/Windows"
+            },
+            {
+              "id": "t2",
+              "title": "SRC",
+              "path": "C:/slotcmp/III/src"
+            },
+            {
+              "id": "t3",
+              "title": "MOD",
+              "path": "C:/slotcmp/III/src/modules"
+            },
+            {
+              "id": "t4",
+              "title": "LOG",
+              "path": "C:/slotcmp/III/config"
+            }
+          ]
+        },
+        {
+          "id": "103",
+          "type": "slot",
+          "component": "explorer",
+          "displayIndex": 3,
+          "width": "40%",
+          "height": "100%",
+          "activeStackIdx": 1,
+          "enabled": false,
+          "collapsed": false,
+          "contentVisible": true,
+          "tabs_in": true,
+          "tabs": [
+            {
+              "id": "t1",
+              "title": "ROOT",
+              "path": "C:/"
+            },
+            {
+              "id": "t2",
+              "title": "CONF",
+              "path": "C:/slotcmp/III/config"
+            },
+            {
+              "id": "t3",
+              "title": "WORK",
+              "path": "C:/slotcmp/III"
+            }
+          ]
+        },
+        {
+          "id": "110",
+          "type": "slot",
+          "component": "viewrs",
+          "displayIndex": 3,
+          "width": "60%",
+          "height": "100%",
+          "activeStackIdx": 1,
+          "enabled": true,
+          "collapsed": false,
+          "contentVisible": true,
+          "tabs_in": true,
+          "tabs": [
+            {
+              "id": "t1",
+              "title": "MARKDOW"
+            },
+            {
+              "id": "t2",
+              "title": "TEXT"
+            },
+            {
+              "id": "t3",
+              "title": "TREE"
+            }
+          ]
+        },
+        {
+          "id": "right_sidebar",
+          "type": "container",
+          "flexDirection": "column",
+          "width": "20%",
+          "height": "100%",
+          "children": [
+            {
+              "id": "106",
+              "type": "slot",
+              "component": "theme",
+              "displayIndex": 4,
+              "width": "100%",
+              "height": "100%",
+              "activeStackIdx": 0,
+              "enabled": false,
+              "collapsed": false,
+              "contentVisible": true,
+              "tabs_in": true,
+              "tabs": [
+                {
+                  "id": "t1",
+                  "title": "PALETTE"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "105",
+      "type": "slot",
+      "component": "command",
+      "displayIndex": 5,
+      "width": "100%",
+      "height": "1",
+      "enabled": true,
+      "collapsed": false,
+      "contentVisible": true
+    },
+    {
+      "id": "104",
+      "type": "slot",
+      "component": "fnbar",
+      "displayIndex": 8,
+      "width": "100%",
+      "height": "1",
+      "enabled": true,
+      "collapsed": false,
+      "contentVisible": true,
+      "activeStackIdx": 0,
+      "tabs": [
+        {
+          "id": "f_default",
+          "title": "DEFAULT",
+          "keys": [
+            "Help",
+            "Menu",
+            "View",
+            "Edit",
+            "Copy",
+            "RenMov",
+            "MkDir",
+            "Delete",
+            "Conf",
+            "Exit"
+          ]
+        },
+        {
+          "id": "f_ctrl",
+          "title": "CTRL",
+          "keys": [
+            "Left",
+            "Right",
+            "Ver",
+            "Edit",
+            "Print",
+            "Link",
+            "Find",
+            "History",
+            "Video",
+            "Tree"
+          ]
+        },
+        {
+          "id": "f_shift",
+          "title": "SHIFT",
+          "keys": [
+            "Help",
+            "User",
+            "Cmd",
+            "Arch",
+            "Copy",
+            "RenMov",
+            "MkDir",
+            "Delete",
+            "Save",
+            "Last"
+          ]
+        },
+        {
+          "id": "f_alt",
+          "title": "ALT",
+          "keys": [
+            "Left",
+            "Right",
+            "View",
+            "Hex",
+            "Pack",
+            "Unpack",
+            "Find",
+            "History",
+            "Video",
+            "Tree"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "108",
+      "type": "slot",
+      "component": "logger",
+      "displayIndex": 6,
+      "width": "100%",
+      "height": "20%",
+      "enabled": true,
+      "collapsed": false,
+      "contentVisible": true
+    },
+    {
+      "id": "100",
+      "type": "slot",
+      "component": "taskbar",
+      "displayIndex": 7,
+      "width": "100%",
+      "height": "1",
+      "enabled": true,
+      "collapsed": false,
+      "contentVisible": true
+    }
+  ]
+}

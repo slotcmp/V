@@ -1,0 +1,9 @@
+{
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "main": "index.js",
+  "version": "3.0.0-PAC-COMPLIANT",
+  "name": "slotcmd"
+}

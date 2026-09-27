@@ -1,0 +1,50 @@
+{
+  "id": "root",
+  "type": "container",
+  "flexDirection": "column",
+  "width": "100%",
+  "height": "100%",
+  "children": [
+    {
+      "id": "200",
+      "type": "slot"
+    },
+    {
+      "id": "101",
+      "type": "slot"
+    },
+    {
+      "id": "main_workspace",
+      "type": "container",
+      "flexDirection": "row",
+      "width": "100%",
+      "height": "50%",
+      "children": [
+        {
+          "id": "102",
+          "type": "slot"
+        },
+        {
+          "id": "110",
+          "type": "slot"
+        }
+      ]
+    },
+    {
+      "id": "105",
+      "type": "slot"
+    },
+    {
+      "id": "104",
+      "type": "slot"
+    },
+    {
+      "id": "108",
+      "type": "slot"
+    },
+    {
+      "id": "100",
+      "type": "slot"
+    }
+  ]
+}
